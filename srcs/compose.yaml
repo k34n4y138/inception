@@ -1,0 +1,15 @@
+name: 'inception'
+
+services:
+  mariadb:
+    container_name: "mariadb"
+    build:
+      context: ./requirements/mariadb
+    image: "mariadb:inception"
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+    x-develop: #experimental docker-compose feature
+      watch:
+        - action: rebuild
+          path: ./requirements/mariadb/spinup.sh
+    
