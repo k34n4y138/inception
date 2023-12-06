@@ -6,10 +6,39 @@ services:
     build:
       context: ./requirements/mariadb
     image: "mariadb:inception"
-    environment:
-      - MARIADB_ROOT_PASSWORD=root
+    env_file:
+      - ./requirements/mariadb/rootpwd.env
     x-develop: #experimental docker-compose feature
       watch:
         - action: rebuild
           path: ./requirements/mariadb/spinup.sh
-    
+    networks:
+      - inception
+  wordpress:
+      container_name: "wordpress"
+      build:
+        context: ./requirements/wordpress
+      image: "wordpress:inception"
+      networks:
+        - inception
+      env_file:
+        - ./requirements/wordpress/wordpress.env
+        - ./requirements/mariadb/rootpwd.env
+      depends_on:
+        - mariadb
+      secrets:
+        - ssl_certificate # access with /run/secrets/ssl_certificate
+      configs:
+        - source: wp_configs
+          target: /var/www/html/wp-config.php
+
+networks:
+  inception:
+    driver: bridge
+configs:
+  wp_configs:
+    file: ./requirements/wordpress/wp-config.php
+
+secrets:
+  ssl_certificate:
+    file: ./requirements/ssl/ssl.crt

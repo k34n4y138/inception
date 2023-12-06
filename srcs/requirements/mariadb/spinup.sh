@@ -2,6 +2,7 @@
 
 echo "Starting MariaDB server";
 
+
 if [ ! -z $MARIADB_ROOT_PASSWORD ]; then
     echo "root password provided, reseting root password";
     mysqld_safe --skip-grant-tables --skip-networking &
@@ -16,5 +17,4 @@ if [ ! -z $MARIADB_ROOT_PASSWORD ]; then
     mysqladmin shutdown -u root -p$MARIADB_ROOT_PASSWORD || (echo "FATAL: failed to shutdown UNSECURE mysql instance!" && exit 1);
 fi
 
-exec mysqld_safe
-
+exec $@
