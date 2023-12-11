@@ -7,8 +7,7 @@ mkdir -p /var/www/wordpress && cd /var/www/wordpress
 
 (wp core download --allow-root) || (echo "Wordpress download failed"; exit 1;)
 
-wp config create --dbname=PLACEHOLDER --dbuser=PLACEHOLDER --dbpass=PLACEHOLDER --dbhost=PLACEHOLDER --allow-root --skip-check || (echo "Wordpress config failed"; exit 1;)
-
 adduser --gecos "" --disabled-password wordpress
+chown -R wordpress:wordpress /var/www/wordpress
 
 echo "Wordpress installed"

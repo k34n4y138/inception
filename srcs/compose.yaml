@@ -4,41 +4,61 @@ services:
   mariadb:
     container_name: "mariadb"
     build:
-      context: ./requirements/mariadb
+      context: ./images/mariadb
     image: "mariadb:inception"
-    env_file:
-      - ./requirements/mariadb/rootpwd.env
-    x-develop: #experimental docker-compose feature
-      watch:
-        - action: rebuild
-          path: ./requirements/mariadb/spinup.sh
+    secrets:
+      - mariadb_secrets
     networks:
       - inception
   wordpress:
       container_name: "wordpress"
       build:
-        context: ./requirements/wordpress
+        context: ./images/wordpress
       image: "wordpress:inception"
+      secrets:
+        - wordpress_secrets
+        - mariadb_secrets
       networks:
         - inception
-      env_file:
-        - ./requirements/wordpress/wordpress.env
-        - ./requirements/mariadb/rootpwd.env
       depends_on:
-        - mariadb
-      secrets:
-        - ssl_certificate # access with /run/secrets/ssl_certificate
+        mariadb:
+          condition: service_healthy
+      volumes:
+        - wordpress:/var/www/wordpress
+      expose:
+        - "9000"
+  nginx:
+      build:
+        context: ./images/nginx
+      image: nginx:inception
+      container_name: "nginx"
+      ports:
+        - "80:80"
+      volumes:
+        - wordpress:/var/www/wordpress
       configs:
-        - source: wp_configs
-          target: /var/www/html/wp-config.php
+        - source: nginx_wordpress_config
+          target: /etc/nginx/sites-enabled/default
+      depends_on:
+        wordpress:
+          condition: service_healthy
+      networks:
+        - inception
+
+volumes:
+  wordpress:
+    driver: local
 
 networks:
   inception:
     driver: bridge
+
 configs:
-  wp_configs:
-    file: ./requirements/wordpress/wp-config.php
+  nginx_wordpress_config:
+    file: ./images/nginx/configs/wordpress.conf
 
 secrets:
-  ssl_certificate:
-    file: ./requirements/ssl/ssl.crt
+  wordpress_secrets:
+    file: ./secrets/wordpress_secrets.env
+  mariadb_secrets:
+    file: ./secrets/mariadb_root_password.env
