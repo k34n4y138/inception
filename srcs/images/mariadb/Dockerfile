@@ -11,4 +11,7 @@ COPY ./spinup.sh /spinup.sh
 RUN chmod +x /spinup.sh
 
 EXPOSE 3306
+
+HEALTHCHECK --interval=5s --timeout=10s --start-period=10s --retries=3 CMD [ "mysqladmin" ,"ping", "-h", "localhost" ]
 ENTRYPOINT [ "/spinup.sh" ]
+CMD [ "mysqld_safe", "--bind-address=0.0.0.0", "--port 3306" ]
