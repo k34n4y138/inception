@@ -2,15 +2,11 @@
 
 echo "Starting MariaDB server";
 
-if [ -f /run/secrets/mariadb_secrets ]; then
-    echo "root password file provided, reseting root password";
-    export $(cat run/secrets/mariadb_secrets | sed 's/#.*//g' | xargs)
-    if [ -z "$MARIADB_ROOT_PASSWORD" ]; then
-        echo "ERROR: root password file is empty";
-        exit 1;
-    fi
+if [ ! -z "$MARIADB_ROOT_PASSWORD" ]; then
+    echo "root password provided, reseting root password";
     mysqld_safe --skip-grant-tables --skip-networking &
     while (! mysqladmin ping > /dev/null 2>&1); do
+        echo "waiting for mysql to start...";
         sleep 1
     done;
    (mysql -e "USE mysql;
