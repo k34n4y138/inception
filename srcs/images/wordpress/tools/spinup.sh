@@ -7,12 +7,6 @@ function fatal () {
     exit 1
 }
 
-if [ ! -f /run/secrets/wordpress_secrets ]; then
-    echo "ERROR: wordpress secrets file not found";
-    exit 1;
-fi
-
-export $(cat /run/secrets/wordpress_secrets | sed 's/#.*//g' | xargs)
 
 if mysqladmin ping -h $WORDPRESS_DB_HOST -u $WORDPRESS_DB_USER -p$WORDPRESS_DB_PASSWORD > /dev/null 2>&1; then
     echo "Setting up database...";

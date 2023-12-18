@@ -1,64 +1,85 @@
 name: 'inception'
 
-services:
-  mariadb:
-    container_name: "mariadb"
-    build:
-      context: ./images/mariadb
-    image: "mariadb:inception"
-    secrets:
-      - mariadb_secrets
-    networks:
-      - inception
-  wordpress:
-      container_name: "wordpress"
-      build:
-        context: ./images/wordpress
-      image: "wordpress:inception"
-      secrets:
-        - wordpress_secrets
-        - mariadb_secrets
-      networks:
-        - inception
-      depends_on:
-        mariadb:
-          condition: service_healthy
-      volumes:
-        - wordpress:/var/www/wordpress
-      expose:
-        - "9000"
-  nginx:
-      build:
-        context: ./images/nginx
-      image: nginx:inception
-      container_name: "nginx"
-      ports:
-        - "80:80"
-      volumes:
-        - wordpress:/var/www/wordpress
-      configs:
-        - source: nginx_wordpress_config
-          target: /etc/nginx/sites-enabled/default
-      depends_on:
-        wordpress:
-          condition: service_healthy
-      networks:
-        - inception
-
 volumes:
   wordpress:
     driver: local
-
-networks:
-  inception:
-    driver: bridge
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "~/data/wordpress"
+  mariadb:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "~/data/mariadb"
 
 configs:
   nginx_wordpress_config:
     file: ./images/nginx/configs/wordpress.conf
 
 secrets:
-  wordpress_secrets:
-    file: ./secrets/wordpress_secrets.env
-  mariadb_secrets:
-    file: ./secrets/mariadb_root_password.env
+
+  ssl_certificate:
+    file: ./ssl/inception-ssl.cert
+  ssl_key:
+    file: ./ssl/inception-ssl.key
+
+networks:
+  inception:
+    driver: bridge
+
+
+services:
+
+  mariadb:
+    container_name: "mariadb"
+    build:
+      context: ./images/mariadb
+    image: "mariadb:inception"
+    volumes:
+      - mariadb:/var/lib/mysql
+    env_file:
+      - .env
+    networks:
+      - inception
+    expose:
+      - "3306"
+
+  wordpress:
+      container_name: "wordpress"
+      build:
+        context: ./images/wordpress
+      image: "wordpress:inception"
+      volumes:
+        - wordpress:/var/www/wordpress
+      env_file:
+        - .env
+      networks:
+        - inception
+      expose:
+        - "9000"
+      depends_on:
+        mariadb:
+          condition: service_healthy
+
+  nginx:
+      build:
+        context: ./images/nginx
+      image: nginx:inception
+      container_name: "nginx"
+      volumes:
+        - wordpress:/var/www/wordpress
+      configs:
+        - source: nginx_wordpress_config
+          target: /etc/nginx/sites-enabled/default
+      secrets:
+        - ssl_certificate
+        - ssl_key
+      networks:
+        - inception
+      ports:
+        - "443:443"
+      depends_on:
+        wordpress:
+          condition: service_healthy
