@@ -1,0 +1,19 @@
+FROM debian:bookworm
+
+LABEL ma.1337.author="zmoumen <zmoumen@student.1337.ma>"
+LABEL ma.1337.version="inception"
+
+
+ADD https://github.com/static-web-server/static-web-server/releases/download/v2.24.2/static-web-server-v2.24.2-x86_64-unknown-linux-gnu.tar.gz /tmp
+
+RUN tar -xvf /tmp/static-web-server-v2.24.2-x86_64-unknown-linux-gnu.tar.gz -C /tmp && \
+    mv /tmp/static-web-server-v2.24.2-x86_64-unknown-linux-gnu/static-web-server /usr/local/bin && \
+    rm -rf /tmp/static-web-server-v2.24.2-x86_64-unknown-linux-gnu
+COPY portfolio /portfolio
+
+WORKDIR /portfolio
+
+HEALTHCHECK --interval=5s --timeout=3s --retries=3 CMD ["pidof", "static-web-server"]
+
+ENTRYPOINT ["static-web-server", "--port", "3000", "--root", "/portfolio"]
+EXPOSE 3000

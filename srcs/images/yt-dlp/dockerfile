@@ -1,0 +1,15 @@
+FROM debian:bookworm
+
+LABEL maintainer="zmoumen <zmoumen@student.1337.ma>"
+LABEL version="inception"
+
+ADD https://github.com/marcopeocchi/yt-dlp-web-ui/releases/download/v.3.0.4/yt-dlp-webui_linux-amd64 /usr/local/bin/yt-dlp-webui
+ADD https://github.com/yt-dlp/yt-dlp/releases/download/2023.12.30/yt-dlp_linux /usr/local/bin/yt-dlp
+RUN chmod +x /usr/local/bin/yt-dlp-webui /usr/local/bin/yt-dlp
+
+EXPOSE 8080
+RUN mkdir /Downloads
+
+HEALTHCHECK --interval=5s --timeout=10s --start-period=10s --retries=3 CMD ["pidof", "yt-dlp-webui"]
+
+CMD ["yt-dlp-webui", "--port", "8080" , "--out", "/Downloads"]

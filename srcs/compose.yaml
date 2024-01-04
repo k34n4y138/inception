@@ -2,12 +2,14 @@ name: 'inception'
 
 volumes:
   wordpress:
+    name: wordpress
     driver: local
     driver_opts:
       type: "none"
       o: "bind"
       device: "~/data/wordpress"
   mariadb:
+    name: mariadb
     driver: local
     driver_opts:
       type: "none"
@@ -16,10 +18,9 @@ volumes:
 
 configs:
   nginx_wordpress_config:
-    file: ./images/nginx/configs/wordpress.conf
+    file: ./images/nginx/configs/inception.conf
 
 secrets:
-
   ssl_certificate:
     file: ./ssl/inception-ssl.cert
   ssl_key:
@@ -27,16 +28,16 @@ secrets:
 
 networks:
   inception:
+    name: inception
     driver: bridge
 
 
 services:
-
   mariadb:
     container_name: "mariadb"
     build:
       context: ./images/mariadb
-    image: "mariadb:inception"
+    image: "mariadb"
     volumes:
       - mariadb:/var/lib/mysql
     env_file:
@@ -50,11 +51,15 @@ services:
       container_name: "wordpress"
       build:
         context: ./images/wordpress
-      image: "wordpress:inception"
+      image: "wordpress"
       volumes:
         - wordpress:/var/www/wordpress
       env_file:
         - .env
+      environment:
+        FTP_HOST: ftp
+        WORDPRESS_REDIS_HOST: redis
+        WORDPRESS_REDIS_PORT: 6379
       networks:
         - inception
       expose:
@@ -62,11 +67,60 @@ services:
       depends_on:
         mariadb:
           condition: service_healthy
-
+        redis:
+          condition: service_healthy
+  redis:
+    build:
+      context: ./images/redis
+    image: "redis"
+    container_name: "redis"
+    networks:
+      - inception
+    expose:
+      - "6379"
+  adminer:
+    build:
+      context: ./images/adminer
+    image: "adminer"
+    container_name: "adminer"
+    networks:
+      - inception
+    depends_on:
+      mariadb:
+        condition: service_healthy
+  ftp:
+    build:
+      context: ./images/ftp
+    image: "ftp"
+    container_name: "ftp"
+    environment:
+      - FTP_HOME=/home/wordpress
+    env_file:
+      - .env
+    networks:
+      - inception
+    volumes:
+      - wordpress:/home/wordpress:rw
+  website:
+    build:
+      context: ./images/website
+    image: website
+    container_name: "website"
+    expose:
+      - "3000"
+    networks:
+      - inception
+  yt-dlp:
+    build:
+      context: ./images/yt-dlp
+    image: yt-dlp
+    container_name: "yt-dlp"
+    networks:
+      - inception
   nginx:
       build:
         context: ./images/nginx
-      image: nginx:inception
+      image: "nginx"
       container_name: "nginx"
       volumes:
         - wordpress:/var/www/wordpress
@@ -82,4 +136,6 @@ services:
         - "443:443"
       depends_on:
         wordpress:
+          condition: service_healthy
+        adminer:
           condition: service_healthy

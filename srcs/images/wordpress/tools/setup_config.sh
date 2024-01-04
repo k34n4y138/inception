@@ -36,5 +36,25 @@ else
     wp --allow-root user update $WORDPRESS_USER --user_pass=$WORDPRESS_USER_PASSWORD;
 fi
 
+
+# enable redis cache
+if [ "$WORDPRESS_REDIS_HOST" != "" ]; then
+    echo "enabling redis cache"
+    wp --allow-root plugin install redis-cache
+    wp --allow-root config set WP_REDIS_PREFIX "inception42"
+    wp --allow-root config set WP_REDIS_HOST $WORDPRESS_REDIS_HOST
+    wp --allow-root config set WP_REDIS_PORT $WORDPRESS_REDIS_PORT
+    wp --allow-root plugin activate redis-cache
+    wp --allow-root redis update-dropin
+    # anonymous user
+fi
+
+
+# set FTP credentials
+wp --allow-root config set FTP_USER $FTP_USER
+wp --allow-root config set FTP_PASS $FTP_PASSWORD
+wp --allow-root config set FTP_HOST $FTP_HOST
+wp --allow-root config set FTP_SSL false
+
 chown -R wordpress:wordpress /var/www/wordpress/wp-config.php /var/www/wordpress/wp-content
 

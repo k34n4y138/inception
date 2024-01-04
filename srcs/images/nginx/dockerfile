@@ -4,5 +4,7 @@ RUN apt update
 
 RUN apt install -y nginx
 
-CMD ["nginx", "-g", "daemon off;"]
 HEALTHCHECK --interval=5s --timeout=3s --start-period=5s CMD [ "curl", "-f", "http://localhost"]
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
+EXPOSE 443

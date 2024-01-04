@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Zakaria Moumen</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="description" content="Zmoumen Portfolio">
+  <meta name="keywords" content="1337student, graduate, backend, developper, engineer, devops, system, admin">
+  <meta name="author" content="Zakaria Moumen">
+  <link rel="stylesheet" type="text/css" href="assets/css/main.css">
+</head>
+
+<body>
+  <!-- notification for small viewports and landscape oriented smartphones -->
+  <div class="device-notification">
+    <p class="device-notification--message">There's much to offer. Orient your device to portrait or find a larger
+      screen. You won't be disappointed.</p>
+  </div>
+  <div class="perspective">
+    <div class="container">
+      <div id="viewport" class="l-viewport">
+        <div class="l-wrapper">
+          <header class="header">
+            <a class="header--logo" href="">
+              <p>ZMOUMEN</p>
+            </a>
+          </header>
+          <nav class="l-side-nav" style="display: none;">
+            <ul class="side-nav">
+              <li class="is-active"><span>Home</span></li>
+            </ul>
+          </nav>
+          <ul class="l-main-content main-content">
+            <li class="l-section section section--is-active">
+              <div class="hero">
+                <div class="hero--content">
+                  <h1>Zakaria Moumen</h1>
+                  <div class="text-carousel-wrapper">
+                    <h4 class="carousel-text carousel-text--active">Backend Developper</h4>
+                    <h4 class="carousel-text">C++ Programmer</h4>
+                    <h4 class="carousel-text">Python Programmer</h4>
+                    <h4 class="carousel-text">Java Programmer</h4>
+                    <h4 class="carousel-text">APIs Architect</h4>
+                    <h4 class="carousel-text">Django Developper</h4>
+                    <h4 class="carousel-text">Springboot Developper</h4>
+                    <h4 class="carousel-text">Linux SysAdmin</h4>
+                    <script>
+                      var carouselTexts = document.getElementsByClassName("carousel-text");
+                      var carouselTextsLength = carouselTexts.length;
+                      var carouselTextsIndex = 0;
+                      var carouselTextsInterval = setInterval(function () {
+                        carouselTexts[carouselTextsIndex].classList.remove("carousel-text--active");
+                        carouselTextsIndex = (carouselTextsIndex + 1) % carouselTextsLength;
+                        carouselTexts[carouselTextsIndex].classList.add("carousel-text--active");
+                      }, 4000);
+                    </script>
+                  </div>
+
+                  <img class="banner" src="assets/img/zmoumen3.png" alt="Zakaria Moumen">
+                </div>
+                <div class="contact-info">
+                  <a target="_blank" href="https://www.linkedin.com/in/zakaria-moumen/">
+                    <img src="assets/img/linkedin.svg">
+                  </a>
+                  <a target="_blank" href="mailto:zmoumen@student.1337.ma">
+                    <img src="assets/img/email.svg">
+                  </a>
+                  <a target="_blank" href="https://github.com/k34n4y138">
+                    <img src="assets/img/github.svg">
+                  </a>
+                </div>
+                <p
+                  style="position: absolute;bottom: 0;/*! right: 10px; */width: 100%;text-align: center;color: grey;opacity: 0.3;">
+                  full website coming soon
+                </p>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="assets/js/vendor/jquery-2.2.4.min.js"></script>
+  <script src="assets/js/vendor/hammer-2.0.8.js"></script>
+  <script src="assets/js/functions.js"></script>
+</body>
+</html>

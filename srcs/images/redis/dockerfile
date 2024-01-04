@@ -1,0 +1,10 @@
+FROM debian:bookworm
+
+
+RUN apt update
+RUN apt install -y redis-server
+
+HEALTHCHECK --interval=5s --timeout=3s --retries=3 CMD ["redis-cli", "ping"]
+
+ENTRYPOINT ["redis-server", "--protected-mode", "no"]
+EXPOSE 6379
