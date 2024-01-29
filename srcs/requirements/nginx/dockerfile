@@ -1,0 +1,10 @@
+FROM debian:bookworm-slim
+
+RUN apt update
+
+RUN apt install -y nginx
+
+HEALTHCHECK --start-period=10s --timeout=10s --interval=10s --retries=3 CMD ["pidof", "nginx"]
+
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
+EXPOSE 443

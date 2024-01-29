@@ -1,4 +1,4 @@
-FROM debian:bookworm
+FROM debian:bookworm-slim
 
 LABEL ma.1337.author="zmoumen <zmoumen@student.1337.ma>"
 LABEL ma.1337.version="inception"
@@ -11,9 +11,8 @@ RUN tar -xvf /tmp/static-web-server-v2.24.2-x86_64-unknown-linux-gnu.tar.gz -C /
     rm -rf /tmp/static-web-server-v2.24.2-x86_64-unknown-linux-gnu
 COPY portfolio /portfolio
 
+HEALTHCHECK --start-period=10s --timeout=10s --interval=10s --retries=3 CMD ["pidof", "static-web-server"]
+
 WORKDIR /portfolio
-
-HEALTHCHECK --interval=5s --timeout=3s --retries=3 CMD ["pidof", "static-web-server"]
-
 ENTRYPOINT ["static-web-server", "--port", "3000", "--root", "/portfolio"]
 EXPOSE 3000

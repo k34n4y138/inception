@@ -18,7 +18,7 @@ COMPOSE = docker compose -f ./srcs/compose.yaml
 all: run
 
 generate_passwords:
-	@ if [ ! -f ./srcs/.env ] || [ "$(MAKECMDGOALS)" = "generate_passwords" ]; then \
+	@ if [ ! -f ./srcs/.env ]; then \
 	echo -n "\
 	MARIADB_ROOT_PASSWORD='$$(openssl rand -hex 32)'\n\
 	WORDPRESS_DB_NAME='$$(openssl rand -hex 10)'\n\
@@ -27,10 +27,8 @@ generate_passwords:
 	WORDPRESS_DB_PASSWORD='$$(openssl rand -hex 32)'\n\
 	WORDPRESS_ADMIN='$$(openssl rand -hex 10)'\n\
 	WORDPRESS_ADMIN_PASSWORD='$$(openssl rand -hex 32)'\n\
-	WORDPRESS_ADMIN_EMAIL='zmoumen@student.1337.ma'\n\
 	WORDPRESS_USER='$$(openssl rand -hex 10)'\n\
 	WORDPRESS_USER_PASSWORD='$$(openssl rand -hex 32)'\n\
-	WORDPRESS_USER_EMAIL='user@example.com'\n\
 	WORDPRESS_TITLE='INCEPTION'\n\
 	WORDPRESS_URL='https://zmoumen.42.fr'\n\
 	FTP_USER='$$(openssl rand -hex 10)'\n\
@@ -52,17 +50,18 @@ set_hosts:
 
 
 generate_ssl:
-	mkdir -p ./srcs/ssl
-	@ if [ ! -f ./srcs/ssl/inception-ssl.key ] || [ ! -f ./srcs/ssl/inception-ssl.cert ] || [ "$(MAKECMDGOALS)" = "generate_ssl" ]; then \
+	@ if [ ! -f ./srcs/ssl/inception-ssl.key ] || [ ! -f ./srcs/ssl/inception-ssl.cert ]; then \
+	mkdir -p ./srcs/ssl; \
 	rm -rf ./srcs/ssl/inception-ssl.key ./srcs/ssl/inception-ssl.cert;\
-	mkcert -key-file ./srcs/ssl/inception-ssl.key -cert-file ./srcs/ssl/inception-ssl.cert "zmoumen.42.fr" "*.zmoumen.42.fr";\
+	mkcert -key-file ./srcs/ssl/inception-ssl.key -cert-file ./srcs/ssl/inception-ssl.cert \
+	"zmoumen.42.fr" "*.zmoumen.42.fr"; \
 	fi
 
-create_volume_folders:
+mk_vol_dir:
 	@mkdir -p ~/data/wordpress
 	@mkdir -p ~/data/mariadb
 
-build: generate_passwords set_hosts generate_ssl create_volume_folders
+build: generate_passwords set_hosts generate_ssl mk_vol_dir
 	@ $(COMPOSE) build
 
 run: build
@@ -74,10 +73,26 @@ logs:
 clean:
 	@ $(COMPOSE) down
 
-fclean: clean
+fclean:
 	$(COMPOSE) down -v --rmi all
 	rm -rf ./srcs/ssl ./srcs/.env
 	sudo rm -fr ~/data
 
-.PHONY: all build run stop clean generate_passwords generate_ssl create_volume_folders logs fclean
+nuke_all:
+	@if [ -n "$$(docker ps -qa)" ]; then \
+		docker stop `docker ps -qa`; \
+		docker rm `docker ps -qa`; \
+	fi
+	@if [ -n "$$(docker images -qa)" ]; then \
+		docker rmi -f `docker images -qa`;\
+	fi
+	@if [ -n "$$(docker volume ls -q)" ]; then \
+		docker volume rm `docker volume ls -q`; \
+	fi
+	@if [ -n "$$(docker network ls -q)" ]; then \
+		docker network rm `docker network ls -q`; \
+	fi || true
+	docker system prune -a -f --volumes
+
+.PHONY: all build run stop clean generate_passwords generate_ssl mk_vol_dir logs fclean
 
